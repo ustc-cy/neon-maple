@@ -53,7 +53,10 @@ for (const file of readdirSync(postsDir)) {
     if (!fm[key]) errors.push(`[${rel}] 缺少必需字段: ${key}`);
   }
   if (fm.tags && !Array.isArray(fm.tags)) errors.push(`[${rel}] tags 必须是数组`);
-  if (fm.draft === '') errors.push(`[${rel}] draft 应为布尔值`);
+  // draft 省略是合法的（schema 默认 false）；键存在但值非 true/false 时提示
+  if (fm.draft !== undefined && fm.draft !== 'true' && fm.draft !== 'false') {
+    errors.push(`[${rel}] draft 应为布尔值（true/false）`);
+  }
 
   // 检查 Markdown 图片引用（![](...)），路径相对 public/ 根
   for (const imgMatch of raw.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)) {
