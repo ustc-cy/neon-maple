@@ -13,6 +13,8 @@ const { title, description, pubDate, updatedDate, tags, category } = post.data;
 const base = import.meta.env.BASE_URL;
 const dateStr = pubDate.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
 const updatedStr = updatedDate?.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+const isoDate = pubDate.toISOString().slice(0, 10);
+const isoUpdated = updatedDate?.toISOString().slice(0, 10);
 ---
 
 <BaseLayout title={`${title} · 晨枫的学习之路`} description={description}>
@@ -20,14 +22,14 @@ const updatedStr = updatedDate?.toLocaleDateString('zh-CN', { year: 'numeric', m
   <article class="container post">
     <header class="post-head">
       <div class="post-meta">
-        <a href={base + `category/${category}/`} class="badge">{category}</a>
-        <time>{dateStr}</time>
-        {updatedStr && <span class="updated">更新于 {updatedStr}</span>}
+        <a href={base + `category/${encodeURIComponent(category)}/`} class="badge">{category}</a>
+        <time datetime={isoDate}>{dateStr}</time>
+        {updatedStr && <span class="updated">更新于 <time datetime={isoUpdated}>{updatedStr}</time></span>}
       </div>
       <h1 class="post-title">{title}</h1>
       <p class="post-desc">{description}</p>
       <div class="post-tags">
-        {tags.map((t) => <a href={base + `tags/${t}/`} class="post-tag">#{t}</a>)}
+        {tags.map((t) => <a href={base + `tags/${encodeURIComponent(t)}/`} class="post-tag">#{t}</a>)}
       </div>
     </header>
     <div class="prose post-body">

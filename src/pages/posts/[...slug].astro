@@ -3,24 +3,20 @@ import { getCollection, render } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('posts');
-  return posts
-    .filter((p) => !p.data.draft)
-    .map((post) => ({
+  // 单次查询 + 过滤，prev/next 随 props 传递，避免两处逻辑重复
+  const posts = (await getCollection('posts')).filter((p) => !p.data.draft);
+  const sorted = [...posts].sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+  return posts.map((post) => {
+    const idx = sorted.findIndex((p) => p.slug === post.slug);
+    return {
       params: { slug: post.slug },
-      props: { post },
-    }));
+      props: { post, prev: sorted[idx + 1] ?? null, next: sorted[idx - 1] ?? null },
+    };
+  });
 }
 
-const { post } = Astro.props;
+const { post, prev, next } = Astro.props;
 const { Content } = await render(post);
-
-const allPosts = (await getCollection('posts'))
-  .filter((p) => !p.data.draft)
-  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
-const idx = allPosts.findIndex((p) => p.slug === post.slug);
-const prev = allPosts[idx + 1];
-const next = allPosts[idx - 1];
 const base = import.meta.env.BASE_URL;
 ---
 
