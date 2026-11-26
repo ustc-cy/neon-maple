@@ -1,0 +1,52 @@
+---
+import { getCollection, render } from 'astro:content';
+import PostLayout from '../../layouts/PostLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  return posts
+    .filter((p) => !p.data.draft)
+    .map((post) => ({
+      params: { slug: post.slug },
+      props: { post },
+    }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const allPosts = (await getCollection('posts'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+const idx = allPosts.findIndex((p) => p.slug === post.slug);
+const prev = allPosts[idx + 1];
+const next = allPosts[idx - 1];
+const base = import.meta.env.BASE_URL;
+---
+
+<PostLayout post={post}>
+  <Content />
+  <nav class="post-nav" aria-label="文章导航">
+    {prev && (
+      <a href={base + `posts/${prev.slug}/`} class="post-nav-item">
+        <span class="post-nav-label">← 上一篇</span>
+        <span class="post-nav-title">{prev.data.title}</span>
+      </a>
+    )}
+    {next && (
+      <a href={base + `posts/${next.slug}/`} class="post-nav-item">
+        <span class="post-nav-label">下一篇 →</span>
+        <span class="post-nav-title">{next.data.title}</span>
+      </a>
+    )}
+  </nav>
+</PostLayout>
+
+<style>
+  .post-nav { display: flex; justify-content: space-between; gap: 1rem; margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 1.5rem; }
+  .post-nav-item { text-decoration: none; color: var(--text); display: flex; flex-direction: column; gap: 0.2rem; max-width: 45%; }
+  .post-nav-label { color: var(--text-muted); font-size: 0.8rem; }
+  .post-nav-title { font-weight: 600; }
+  .post-nav-item:hover .post-nav-title { color: var(--neon-cyan); }
+  .post-nav-item:last-child { text-align: right; margin-left: auto; }
+</style>

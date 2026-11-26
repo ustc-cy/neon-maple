@@ -1,0 +1,16 @@
+<div class="progress-bar" id="progress-bar" aria-hidden="true"></div>
+
+<script>
+  const bar = document.getElementById('progress-bar');
+  if (bar) {
+    const onScroll = () => {
+      const h = document.documentElement;
+      const total = h.scrollHeight - h.clientHeight;
+      const pct = total > 0 ? (h.scrollTop / total) * 100 : 0;
+      bar.style.width = pct + '%';
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    onScroll();
+  }
+</script>
