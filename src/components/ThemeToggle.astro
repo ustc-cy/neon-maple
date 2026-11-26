@@ -1,0 +1,44 @@
+---
+const label = '切换主题';
+---
+
+<button class="theme-toggle" id="theme-toggle" aria-label={label} title={label}>
+  <span class="icon-dark" aria-hidden="true">🌙</span>
+  <span class="icon-light" aria-hidden="true">☀️</span>
+</button>
+
+<style>
+  .theme-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.25s ease;
+  }
+  .theme-toggle:hover { box-shadow: var(--shadow-glow); }
+  .icon-light { display: none; }
+  html[data-theme='light'] .icon-light { display: inline; }
+  html[data-theme='light'] .icon-dark { display: none; }
+</style>
+
+<script>
+  function applyTheme(theme: 'dark' | 'light') {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('neon-theme', theme);
+  }
+
+  const toggle = document.getElementById('theme-toggle');
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    });
+  }
+</script>
