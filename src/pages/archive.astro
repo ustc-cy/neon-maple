@@ -1,0 +1,53 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const posts = (await getCollection('posts'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+const byMonth = new Map<string, typeof posts>();
+for (const post of posts) {
+  const key = post.data.pubDate.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' });
+  if (!byMonth.has(key)) byMonth.set(key, []);
+  byMonth.get(key)!.push(post);
+}
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title="归档 · 晨枫的学习之路" description="全部文章按时间归档">
+  <section class="container archive">
+    <h1 class="page-title">归档</h1>
+    <p class="page-count">共 {posts.length} 篇文章</p>
+    {
+      [...byMonth.entries()].map(([month, items]) => (
+        <div class="month-block">
+          <h2 class="month-title">{month}</h2>
+          <ul class="month-list">
+            {items.map((post) => (
+              <li class="month-item">
+                <time class="month-date">{post.data.pubDate.toLocaleDateString('zh-CN', { day: 'numeric' })}日</time>
+                <a href={base + `posts/${post.slug}/`} class="month-link">{post.data.title}</a>
+                <span class="month-cat">{post.data.category}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+  </section>
+</BaseLayout>
+
+<style>
+  .archive { padding-top: 2.5rem; padding-bottom: 3rem; }
+  .page-title { font-size: 1.9rem; margin: 0 0 0.3rem; }
+  .page-count { color: var(--text-muted); margin: 0 0 1.8rem; }
+  .month-block { margin-bottom: 1.8rem; }
+  .month-title { font-size: 1.25rem; margin: 0 0 0.6rem; color: var(--neon-purple); }
+  .month-list { list-style: none; margin: 0; padding: 0; }
+  .month-item { display: flex; align-items: baseline; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px dashed var(--border); }
+  .month-date { color: var(--text-muted); font-size: 0.85rem; min-width: 3em; }
+  .month-link { color: var(--text); text-decoration: none; font-weight: 500; }
+  .month-link:hover { color: var(--neon-cyan); }
+  .month-cat { margin-left: auto; color: var(--text-muted); font-size: 0.8rem; }
+</style>

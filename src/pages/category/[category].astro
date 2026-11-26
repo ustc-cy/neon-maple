@@ -1,0 +1,34 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  const live = posts.filter((p) => !p.data.draft);
+  const categories = [...new Set(live.map((p) => p.data.category))];
+  return categories.map((category) => ({ params: { category }, props: { category } }));
+}
+
+const { category } = Astro.props;
+const posts = (await getCollection('posts'))
+  .filter((p) => !p.data.draft && p.data.category === category)
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+---
+
+<BaseLayout title={`分类：${category} · 晨枫的学习之路`} description={`分类「${category}」下的全部文章`}>
+  <section class="container-wide page">
+    <h1 class="page-title">分类：<span class="neon-text">{category}</span></h1>
+    <p class="page-count">共 {posts.length} 篇文章</p>
+    <div class="grid">
+      {posts.map((post) => <ArticleCard post={post} />)}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page { padding-top: 2.5rem; padding-bottom: 3rem; }
+  .page-title { font-size: 1.9rem; margin: 0 0 0.3rem; }
+  .page-count { color: var(--text-muted); margin: 0 0 1.5rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.1rem; }
+</style>
