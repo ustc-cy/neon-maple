@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro check && astro build && npm run build:index",
-    "build:index": "pagefind --site dist --base-path /neon-maple",
+    "build:index": "pagefind --site dist",
     "preview": "astro preview",
     "check": "astro check",
     "check:content": "node scripts/check-content.mjs"
