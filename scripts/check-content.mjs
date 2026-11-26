@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const postsDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'content', 'posts');
 const publicDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public');
 
-// 极简 frontmatter 解析（支持标量 + 数组 tags）
+// 极简 frontmatter 解析（仅支持单行标量与单行数组，如 tags: [a, b]；不支持多行/块标量）
 function parseFrontmatter(raw) {
   const m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!m) return null;
@@ -35,6 +35,14 @@ function parseFrontmatter(raw) {
   return data;
 }
 
+// 支持的图片扩展名（大小写不敏感）
+const imgExt = /\.(svg|png|jpe?g|webp|gif|avif)$/i;
+
+// 剥离围栏代码块与 HTML 注释，避免把示例代码/注释里的图片误当真实引用
+function stripCodeAndComments(raw) {
+  return raw.replace(/```[\s\S]*?```/g, '').replace(/<!--[\s\S]*?-->/g, '');
+}
+
 const required = ['title', 'description', 'category', 'pubDate'];
 const errors = [];
 let fileCount = 0;
@@ -58,9 +66,13 @@ for (const file of readdirSync(postsDir)) {
     errors.push(`[${rel}] draft 应为布尔值（true/false）`);
   }
 
+  // 先剥离代码块与注释，再扫描图片引用，避免误报示例写法
+  const content = stripCodeAndComments(raw);
+
   // 检查 Markdown 图片引用（![](...)），路径相对 public/ 根
-  for (const imgMatch of raw.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)) {
-    let src = imgMatch[1].replace(/["']$/, '');
+  for (const imgMatch of content.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)) {
+    // 支持 "path title" 形式（空格后是可选 title），只取路径部分
+    let src = imgMatch[1].trim().split(/\s+/)[0];
     if (src.startsWith('http') || src.startsWith('.')) continue;
     src = src.split('#')[0].split('?')[0];
     if (!existsSync(join(publicDir, src.replace(/^\//, '')))) {
@@ -69,8 +81,7 @@ for (const file of readdirSync(postsDir)) {
   }
 
   // 检查 MDX 中 import 的图片资源（相对路径，相对于文章所在目录）
-  const imgExt = /\.(svg|png|jpe?g|webp|gif|avif)$/;
-  for (const imp of raw.matchAll(/import\s+[^'";]+\s+from\s+['"]([^'"]+)['"]/g)) {
+  for (const imp of content.matchAll(/import\s+[^'";]+\s+from\s+['"]([^'"]+)['"]/g)) {
     const p = imp[1];
     if (!p.startsWith('.') || !imgExt.test(p)) continue;
     const target = join(dirname(join(postsDir, file)), p);
