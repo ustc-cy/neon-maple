@@ -11,7 +11,7 @@ export default defineConfig({
   integrations: [mdx(), sitemap()],
   markdown: {
     shikiConfig: {
-      theme: neonTheme,
+      theme: /** @type {import('@shikijs/types').ThemeRegistrationAny} */ (neonTheme),
       wrap: true,
     },
   },
