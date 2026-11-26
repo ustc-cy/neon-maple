@@ -213,6 +213,4 @@ html[data-theme='light'] .prose pre { background: #10162b; }
 /* ===== 响应式 ===== */
 @media (max-width: 640px) {
   .container, .container-wide { width: min(100% - 1.5rem, var(--maxw)); }
-  .lightbox-nav.prev { left: 0.5rem; }
-  .lightbox-nav.next { right: 0.5rem; }
 }
