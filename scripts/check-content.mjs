@@ -18,8 +18,8 @@ function parseFrontmatter(raw) {
   for (const line of lines) {
     const kv = line.match(/^([A-Za-z]+):\s*(.*)$/);
     if (kv) {
-      // 仅在数组有积压项时落盘，避免覆盖已直接写入的标量值
-      if (currentKey && arr.length) data[currentKey] = arr;
+      // 仅在数组有积压项时落盘；用 slice 复制，避免后续 arr 清空影响已存值
+      if (currentKey && arr.length) data[currentKey] = arr.slice();
       currentKey = kv[1];
       const val = kv[2].trim();
       if (val.startsWith('[')) {
@@ -31,7 +31,7 @@ function parseFrontmatter(raw) {
       }
     }
   }
-  if (currentKey && arr.length) data[currentKey] = arr;
+  if (currentKey && arr.length) data[currentKey] = arr.slice();
   return data;
 }
 
