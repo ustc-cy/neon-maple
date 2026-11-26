@@ -60,6 +60,16 @@
 
   let pagefind: any = null;
   let timer: number | undefined;
+  let seq = 0; // 请求序号，丢弃过期响应避免搜索竞态
+  let lastFocused: HTMLElement | null = null; // 打开前焦点元素，关闭时还原
+
+  function showEmpty(text: string) {
+    results!.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = 'search-empty';
+    div.textContent = text;
+    results!.appendChild(div);
+  }
 
   async function ensurePagefind() {
     if (pagefind) return;
@@ -67,34 +77,47 @@
   }
 
   async function doSearch(query: string) {
-    results!.innerHTML = '';
+    const my = ++seq;
     if (!query.trim()) {
-      results!.innerHTML = '<div class="search-empty">输入关键词开始搜索</div>';
+      showEmpty('输入关键词开始搜索');
       return;
     }
     try {
       await ensurePagefind();
       const search = await pagefind.search(query);
+      if (my !== seq) return; // 过期响应，丢弃
       const items = search.results?.slice(0, 12) ?? [];
+      results!.innerHTML = '';
       if (items.length === 0) {
-        results!.innerHTML = '<div class="search-empty">没有找到相关文章</div>';
+        showEmpty('没有找到相关文章');
         return;
       }
       for (const item of items) {
         const data = await item.data();
+        if (my !== seq) return;
         const a = document.createElement('a');
         a.className = 'search-result';
-        a.href = base + (data.url ?? '').replace(/^\//, '');
-        a.innerHTML = `<div class="sr-title">${data.meta?.title ?? ''}</div>
-          <div class="sr-meta">${data.meta?.description ?? ''}</div>`;
+        // Pagefind 索引遵循 canonical（已含 base），防御式归一化避免双重前缀
+        const url = data.url ?? '';
+        a.href = url.startsWith(base) ? url : base + url.replace(/^\//, '');
+        const title = document.createElement('div');
+        title.className = 'sr-title';
+        title.textContent = data.meta?.title ?? '';
+        const meta = document.createElement('div');
+        meta.className = 'sr-meta';
+        meta.textContent = data.meta?.description ?? '';
+        a.append(title, meta);
         results!.appendChild(a);
       }
     } catch (e) {
-      results!.innerHTML = '<div class="search-empty">搜索暂不可用（构建时未生成索引）</div>';
+      if (my !== seq) return;
+      console.error('搜索失败:', e);
+      showEmpty('搜索暂不可用（构建时未生成索引）');
     }
   }
 
   function open() {
+    lastFocused = document.activeElement as HTMLElement | null;
     overlay!.classList.add('open');
     overlay!.setAttribute('aria-hidden', 'false');
     setTimeout(() => input?.focus(), 60);
@@ -103,6 +126,8 @@
   function close() {
     overlay!.classList.remove('open');
     overlay!.setAttribute('aria-hidden', 'true');
+    lastFocused?.focus(); // 焦点还原到触发搜索的元素
+    lastFocused = null;
   }
 
   const searchBtn = document.getElementById('search-btn');
