@@ -9,7 +9,8 @@ export async function GET(context) {
   return rss({
     title: '晨枫的学习之路',
     description: '记录学习历程与经验总结',
-    site: context.site,
+    // 拼接部署 base（/neon-maple/），否则订阅链接会指向不含 base 的 404 地址
+    site: new URL(import.meta.env.BASE_URL, context.site),
     items: posts.map((post) => ({
       title: post.data.title,
       description: post.data.description,
