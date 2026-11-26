@@ -15,7 +15,8 @@ export async function GET(context) {
       title: post.data.title,
       description: post.data.description,
       pubDate: post.data.pubDate,
-      link: `/posts/${post.slug}/`,
+      // 相对路径，配合带 base 的 site 拼出完整地址（绝对路径会丢掉 /neon-maple/）
+      link: `posts/${post.slug}/`,
       categories: post.data.tags,
     })),
   });
