@@ -31,7 +31,11 @@ const label = '切换主题';
 <script>
   function applyTheme(theme: 'dark' | 'light') {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('neon-theme', theme);
+    try {
+      localStorage.setItem('neon-theme', theme);
+    } catch (e) {
+      /* 存储不可用（隐私模式等）时忽略，仅切换外观 */
+    }
   }
 
   const toggle = document.getElementById('theme-toggle');

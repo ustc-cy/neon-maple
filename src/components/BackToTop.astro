@@ -14,11 +14,12 @@
     font-size: 1.1rem;
     cursor: pointer;
     opacity: 0;
+    visibility: hidden; /* 移出 Tab 序与可访问性树 */
     pointer-events: none;
     transition: opacity 0.25s ease, box-shadow 0.25s ease;
     z-index: 90;
   }
-  .back-to-top.show { opacity: 1; pointer-events: auto; }
+  .back-to-top.show { opacity: 1; visibility: visible; pointer-events: auto; }
   .back-to-top:hover { box-shadow: var(--shadow-glow); }
 </style>
 
@@ -27,6 +28,7 @@
   if (btn) {
     const onScroll = () => btn.classList.toggle('show', window.scrollY > 400);
     window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); // 页面加载时若已滚动（刷新/锚点跳转），立即同步状态
     btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
   }
 </script>
