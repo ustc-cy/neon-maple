@@ -1,0 +1,127 @@
+<div class="search-overlay" id="search-overlay" aria-hidden="true">
+  <div class="search-panel" role="dialog" aria-label="搜索文章">
+    <input
+      type="text"
+      class="search-input"
+      id="search-input"
+      placeholder="搜索文章标题或内容…"
+      autocomplete="off"
+    />
+    <div class="search-results" id="search-results"></div>
+  </div>
+</div>
+
+<style>
+  .search-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(5, 8, 15, 0.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 12vh;
+  }
+  .search-overlay.open { display: flex; }
+  .search-panel {
+    width: min(100% - 2rem, 560px);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-glow);
+  }
+  .search-input {
+    width: 100%;
+    padding: 1rem 1.2rem;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font-size: 1rem;
+    outline: none;
+  }
+  .search-results { max-height: 55vh; overflow-y: auto; padding: 0.5rem; }
+  .search-result { display: block; padding: 0.75rem 1rem; border-radius: 10px; color: var(--text); text-decoration: none; }
+  .search-result:hover { background: var(--surface-strong); }
+  .search-result .sr-title { font-weight: 600; margin-bottom: 0.2rem; }
+  .search-result .sr-meta { font-size: 0.8rem; color: var(--text-muted); }
+  .search-empty { padding: 1.5rem; color: var(--text-muted); text-align: center; }
+</style>
+
+<script>
+  const overlay = document.getElementById('search-overlay');
+  const input = document.getElementById('search-input') as HTMLInputElement;
+  const results = document.getElementById('search-results');
+  // Astro 编译时注入站点 base（如 /neon-maple/），保证在子路径部署下索引 URL 正确
+  const base = import.meta.env.BASE_URL;
+
+  let pagefind: any = null;
+  let timer: number | undefined;
+
+  async function ensurePagefind() {
+    if (pagefind) return;
+    pagefind = await import(/* @vite-ignore */ base + 'pagefind/pagefind.js');
+  }
+
+  async function doSearch(query: string) {
+    results!.innerHTML = '';
+    if (!query.trim()) {
+      results!.innerHTML = '<div class="search-empty">输入关键词开始搜索</div>';
+      return;
+    }
+    try {
+      await ensurePagefind();
+      const search = await pagefind.search(query);
+      const items = search.results?.slice(0, 12) ?? [];
+      if (items.length === 0) {
+        results!.innerHTML = '<div class="search-empty">没有找到相关文章</div>';
+        return;
+      }
+      for (const item of items) {
+        const data = await item.data();
+        const a = document.createElement('a');
+        a.className = 'search-result';
+        a.href = base + (data.url ?? '').replace(/^\//, '');
+        a.innerHTML = `<div class="sr-title">${data.meta?.title ?? ''}</div>
+          <div class="sr-meta">${data.meta?.description ?? ''}</div>`;
+        results!.appendChild(a);
+      }
+    } catch (e) {
+      results!.innerHTML = '<div class="search-empty">搜索暂不可用（构建时未生成索引）</div>';
+    }
+  }
+
+  function open() {
+    overlay!.classList.add('open');
+    overlay!.setAttribute('aria-hidden', 'false');
+    setTimeout(() => input?.focus(), 60);
+  }
+
+  function close() {
+    overlay!.classList.remove('open');
+    overlay!.setAttribute('aria-hidden', 'true');
+  }
+
+  const searchBtn = document.getElementById('search-btn');
+  searchBtn?.addEventListener('click', open);
+
+  input?.addEventListener('input', () => {
+    window.clearTimeout(timer);
+    timer = window.setTimeout(() => doSearch(input.value), 200);
+  });
+
+  overlay?.addEventListener('click', (e) => {
+    if (e.target === overlay) close();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') close();
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      overlay!.classList.contains('open') ? close() : open();
+    }
+  });
+</script>
