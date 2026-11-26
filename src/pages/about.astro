@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title="关于我 · 晨枫的学习之路" description="关于晨枫的学习之路">
+  <article class="container about">
+    <h1 class="about-title">关于<span class="neon-text">我</span></h1>
+    <div class="prose">
+      <p>你好，我是 <strong>晨枫</strong>，一名技术经理，也是兼职产品经理。</p>
+      <p>这个博客「<strong>晨枫的学习之路</strong>」用于记录我的学习历程、踩坑经验与总结分享。希望能把零散的知识沉淀下来，也帮助到同样在路上的你。</p>
+      <p>技术方向：前端、后端、工程化、以及一切值得学习的东西。</p>
+      <p>欢迎通过 RSS 订阅，或到我的 GitHub 交流：<a href="https://github.com/ustc-cy" target="_blank" rel="noopener">github.com/ustc-cy</a>。</p>
+    </div>
+    <div class="about-actions">
+      <a href={base + 'archive'} class="btn btn-primary">浏览全部文章 →</a>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .about { padding-top: 2.5rem; padding-bottom: 3rem; }
+  .about-title { font-size: 2rem; margin: 0 0 1.2rem; }
+  .about-actions { margin-top: 2rem; }
+</style>

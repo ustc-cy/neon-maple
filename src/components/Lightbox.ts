@@ -19,16 +19,16 @@ export function initLightbox() {
     img.src = target.currentSrc || target.src;
     caption!.textContent = target.getAttribute('alt') || '';
     lastTrigger = trigger;
-    overlay.classList.add('open');
-    overlay.setAttribute('aria-hidden', 'false');
+    overlay!.classList.add('open');
+    overlay!.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
     syncNav();
     closeBtn?.focus();
   }
 
   function close() {
-    overlay.classList.remove('open');
-    overlay.setAttribute('aria-hidden', 'true');
+    overlay!.classList.remove('open');
+    overlay!.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
     lastTrigger?.focus();
     lastTrigger = null;

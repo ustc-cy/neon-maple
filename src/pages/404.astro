@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title="页面不存在 · 晨枫的学习之路" description="页面不存在">
+  <section class="container nf">
+    <p class="nf-code neon-text">404</p>
+    <h1 class="nf-title">页面走丢了</h1>
+    <p class="nf-desc">你要找的内容不存在或已被移动。</p>
+    <a href={base} class="btn btn-primary">回到首页</a>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf { padding-top: 5rem; padding-bottom: 5rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+  .nf-code { font-size: 5rem; font-weight: 800; margin: 0; line-height: 1; }
+  .nf-title { font-size: 1.6rem; margin: 0; }
+  .nf-desc { color: var(--text-muted); margin: 0; }
+</style>
