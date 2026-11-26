@@ -1,0 +1,26 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+
+<section class="hero">
+  <div class="container hero-inner">
+    <span class="badge hero-badge">✦ 个人学习博客</span>
+    <h1 class="hero-title">
+      <span class="neon-text">晨枫的学习之路</span>
+    </h1>
+    <p class="hero-sub">记录学习历程，分享经验总结。与热爱学习的你同行。</p>
+    <div class="hero-actions">
+      <a href={base + 'archive'} class="btn btn-primary">浏览归档 →</a>
+      <a href={base + 'about'} class="btn">关于我</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero { padding: 4.5rem 0 3rem; text-align: center; }
+  .hero-inner { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+  .hero-badge { font-size: 0.85rem; letter-spacing: 0.1em; }
+  .hero-title { font-size: clamp(2.2rem, 6vw, 3.4rem); margin: 0; font-weight: 800; }
+  .hero-sub { color: var(--text-muted); max-width: 34em; margin: 0; font-size: 1.05rem; }
+  .hero-actions { display: flex; gap: 0.9rem; margin-top: 0.6rem; }
+</style>

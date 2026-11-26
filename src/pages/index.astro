@@ -1,0 +1,56 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+
+const posts = (await getCollection('posts'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+const recent = posts.slice(0, 6);
+
+const categories = [...new Set(posts.map((p) => p.data.category))].slice(0, 8);
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title="晨枫的学习之路">
+  <Hero />
+
+  <section class="section container-wide">
+    <div class="section-head">
+      <h2 class="section-title">最新文章</h2>
+      <a href={base + 'archive'} class="section-more">全部文章 →</a>
+    </div>
+    <div class="grid">
+      {recent.map((post) => <ArticleCard post={post} />)}
+    </div>
+  </section>
+
+  {
+    categories.length > 0 && (
+      <section class="section container-wide">
+        <div class="section-head">
+          <h2 class="section-title">分类</h2>
+        </div>
+        <div class="cat-list">
+          {categories.map((c) => (
+            <a href={base + `category/${c}/`} class="badge cat-badge">{c}</a>
+          ))}
+        </div>
+      </section>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .section { margin-top: 3rem; }
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1.2rem; }
+  .section-title { margin: 0; font-size: 1.4rem; }
+  .section-title::before { content: '✦ '; color: var(--neon-purple); }
+  .section-more { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
+  .section-more:hover { color: var(--neon-cyan); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.1rem; }
+  .cat-list { display: flex; flex-wrap: wrap; gap: 0.7rem; }
+  .cat-badge { font-size: 0.9rem; padding: 0.35rem 1rem; }
+</style>
