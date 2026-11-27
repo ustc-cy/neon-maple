@@ -79,9 +79,6 @@ export function initLightbox() {
   closeBtn?.addEventListener('click', close);
   prevBtn?.addEventListener('click', prev);
   nextBtn?.addEventListener('click', next);
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) close();
-  });
   document.addEventListener('keydown', (e) => {
     if (!overlay.classList.contains('open')) return;
     if (e.key === 'Escape') close();

@@ -19,7 +19,7 @@ const isoUpdated = updatedDate?.toISOString().slice(0, 10);
 
 <BaseLayout title={`${title} · 晨枫的学习之路`} description={description}>
   <ProgressBar />
-  <article class="container post">
+  <article class="container post" data-pagefind-body>
     <header class="post-head">
       <div class="post-meta">
         <a href={base + `category/${encodeURIComponent(category)}/`} class="badge">{category}</a>
